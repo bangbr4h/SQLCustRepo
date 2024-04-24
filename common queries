@@ -1,0 +1,14 @@
+--To find closed payee
+
+select * from payer where payername like '%%'
+
+select idAtPayer, * from payee where firstPayer =  and email in ('encrypted email')
+
+select payername,idatpayer,accountClosed,aspnet_Membership.Email as 'SuppliersPortalLoginEmail'
+from aspnet_Membership 
+join VendorPortalPayees on VendorPortalPayees.membershipUserId = aspnet_Membership.UserId
+join payee on payee.id = VendorPortalPayees.payeeId
+join payer on payer.id = payee.firstpayer
+where aspnet_Membership.Email like '%%' and payer.payerName = '' 
+
+select * from payee where firstPayer =  and idAtPayer = '' 
