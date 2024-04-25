@@ -12,3 +12,38 @@ join payer on payer.id = payee.firstpayer
 where aspnet_Membership.Email like '%%' and payer.payerName = '' 
 
 select * from payee where firstPayer =  and idAtPayer = '' 
+
+---------------
+w8 search
+
+SELECT w8.id
+ 
+FROM taxform tf
+ 
+join W8BEN w8 on tf.w8BENId = w8.id
+ 
+where tf.id in (select TaxFormId from PayeeVersions where firstPayer = 291)
+ 
+and tf.datesigned between '2017-01-01' AND '2019-12-31' 
+ 
+ORDER BY w8.id DESC
+----------------
+w9 search
+
+SELECT * FROM TaxForm tf
+ 
+join w9 on tf.w9Id = w9.id
+ 
+where type = 0 and tf.id in (select TaxFormId from PayeeVersions where firstPayer = 291)
+ 
+and w9.dateCreated between '2017-01-01' AND '2017-05-24' ORDER BY tf.id DESC
+-----------------
+versioning issues
+
+SELECT pv.payeeId, count(distinct(w8.treatyCountry)),pv.idAtPayer
+FROM PayeeVersions pv
+join TaxForm tf on tf.id = pv.taxFormId
+join W8BEN w8 on tf.w8BENId = w8.id
+where pv.firstPayer =
+group by pv.payeeId,pv.idatpayer
+having count(distinct(w8.treatyCountry)) > 1
