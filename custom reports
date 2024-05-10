@@ -1,0 +1,83 @@
+--Payee bank details with tax form info
+
+  SELECT 
+    pa.idAtPayer, 
+    pa.displayName, 
+    CASE 
+        WHEN pa.selectedPM = -1 THEN 'NoPaymentMethod'
+        WHEN pa.selectedPM = 0 THEN 'PayPal'
+        WHEN pa.selectedPM = 1 THEN 'Payoneer'
+        WHEN pa.selectedPM = 2 THEN 'Wire'
+        WHEN pa.selectedPM = 3 THEN 'ACH'
+        WHEN pa.selectedPM = 4 THEN 'Check'
+        WHEN pa.selectedPM = 6 THEN 'eCheck'
+        WHEN pa.selectedPM = 7 THEN 'HoldMyPayments'
+        WHEN pa.selectedPM = 8 THEN 'Custom'
+        WHEN pa.selectedPM = 9 THEN 'EntroPay'
+        WHEN pa.selectedPM = 10 THEN 'Skrill'
+        WHEN pa.selectedPM = 11 THEN 'Intercash'
+        ELSE NULL
+    END AS PaymentMethod,
+    pa.email, 
+    pa.phone, 
+    pa.beneStreet1, 
+    pa.beneStreet2, 
+    pa.beneZip, 
+    pa.beneCity, 
+    pa.country, 
+    ri.[Routing Code], 
+    ri.[Account Number], 
+    ri.[Account Name],
+    ri.checkCurrency, 
+    ri.eCheckCurrency,
+    ri.entroPayCurrency,
+    ri.wireCurrency,
+    ri.paypalCurrency,
+    ri.WUCurrency,
+    ri.[Bank Name], 
+    ri.[Branch Name], 
+    ri.SWIFT, 
+    ri.IBAN,
+    w9.individual,
+    w9.corp,
+    w9.[S Corp],
+    w9.[C Corp],
+    w9.Trust,
+    w9.partnership,
+    w9.llc,
+    w9.llcType,
+    CASE 
+        WHEN tf.type = 0 THEN 'W9'
+        WHEN tf.type = 1 THEN 'W8BEN'
+        WHEN tf.type = 2 THEN 'W8BENE'
+        WHEN tf.type = 3 THEN 'W8ECI'
+        WHEN tf.type = 4 THEN 'W8IMY'
+        WHEN tf.type = 5 THEN 'W8EXP'
+        WHEN tf.type = 6 THEN 'W4'
+        WHEN tf.type = 7 THEN '_8233'
+        WHEN tf.type = 8 THEN 'ManualByPayer'
+        WHEN tf.type = 9 THEN 'NonUsStatement'
+        WHEN tf.type = 10 THEN 'VatAndTax'
+        WHEN tf.type = 11 THEN 'CustomIsraeliDeclaration'
+        WHEN tf.type = 12 THEN 'CustomNonIsraeliDeclaration'
+        WHEN tf.type = 13 THEN 'CustomMatomyCyprus'
+        WHEN tf.type = 14 THEN 'CustomMatomyIsraeli'
+        WHEN tf.type = 15 THEN 'CustomMatomyNonIsraeli'
+        WHEN tf.type = 16 THEN 'BrazilianAuthoritiesRegistration'
+        WHEN tf.type = 17 THEN 'LocalTaxId' 
+    END AS TaxFormType,
+    w9.ssn AS W9SSN,
+    w9.ein AS W9EIN
+FROM 
+    payee pa 
+JOIN 
+    [Routing Info] ri ON pa.id = ri.payeeId 
+JOIN 
+    TaxForm tf ON tf.id = pa.activeTaxFormId
+JOIN 
+    w9 ON w9.id = tf.w9Id
+WHERE 
+    pa.firstPayer =  
+    AND pa.activeTaxFormId IS NOT NULL; 
+
+--------------------
