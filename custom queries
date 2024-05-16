@@ -1,0 +1,15 @@
+Discover which users did not convert from 0 to 1 after featurerollout change
+SELECT DISTINCT payerid
+FROM FeatureRolloutHistoryRecord
+WHERE featureName = 'RestrictPayerIPsUsingAPI'
+AND featurestatus = 1
+AND CONVERT(DATE, changestatusdate) = '2024-05-10'
+AND payerid NOT IN (
+    SELECT payerid
+    FROM FeatureRolloutHistoryRecord
+    WHERE featureName = 'RestrictPayerIPsUsingAPI'
+    AND featurestatus = 0
+    AND CONVERT(DATE, changestatusdate) < CONVERT(DATE, '2024-05-10')
+) 
+----------
+  
