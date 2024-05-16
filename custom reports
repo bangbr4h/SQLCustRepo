@@ -81,3 +81,10 @@ WHERE
     AND pa.activeTaxFormId IS NOT NULL; 
 
 --------------------
+payer users by entity
+
+select payerusers.email, User_PayerEntity.payerEntityId
+from User_PayerEntity
+join payerusers on User_PayerEntity.payerUserId = payerusers.id
+where User_PayerEntity.payerEntityId IN (7901, 6979, 6981)
+order by payerEntityId; 
