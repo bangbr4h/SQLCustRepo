@@ -88,3 +88,94 @@ from User_PayerEntity
 join payerusers on User_PayerEntity.payerUserId = payerusers.id
 where User_PayerEntity.payerEntityId IN (7901, 6979, 6981)
 order by payerEntityId; 
+--------------------
+
+OFAC Compliance
+
+use Tipalti
+--
+--For testing - delete after
+--
+declare @start datetime = (getutcdate() - 50)
+declare @end datetime = (getutcdate())
+--
+--For testing - delete after
+--
+select
+	 p.idatpayer [Payee ID]
+	,p.fullName [Payee Full Name]
+	,p.companyName [Payee Company Name]
+	,case p.ofacStatus
+		when 0 then 'Unchecked'
+		when 1 then 'Pending Check'
+		when 2 then 'Compliance Review'
+		when 3 then 'Cleared'
+		when 4 then 'Blocked'
+		when 5 then 'No Docs Provided'
+		when 6 then 'Passed Check'
+	 end [Payee OFAC Status]
+	,p.ofacStatusReason [Last OFAC Status Reason]
+	,oh.firsthittime [OFAC First Hit Time]
+	,(
+		select top 1 createdate from compliancereason where id = cr.id
+	 ) [Last Compliance Check Date] --Future-proofing in case more than 1 value returns
+	,(
+		select top 1 reason from compliancereason where id = cr.id
+	 ) [Last Compliance Check Reason] --Future-proofing in case more than 1 value returns
+from
+	Payee p
+	left join OfacHit oh on p.id = oh.PayeeId
+	left join ComplianceCheck cc on p.id = cc.payeeId
+	left join ComplianceReason cr on cc.id = cr.complianceCheckId
+where
+	p.firstPayer = 914
+	and oh.FirstHitTime between @start and @end
+order by
+	 [OFAC First Hit Time] desc
+	,[Last Compliance Check Date] desc
+--
+--Testing
+--
+select table_name, column_name from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME like '%compliance%'
+/*
+table_name						column_name
+PayerConfiguration				complianceDocumentRequestEmailRecipient
+Payee							isEligibleForCompliance
+ComplianceCheck_PaymentOrder	complianceCheckId
+ComplianceReason				complianceCheckId
+PayeeVersions					isEligibleForCompliance
+ComplianceCheck					complianceStatus
+ComplianceCheck					complianceType
+ComplianceCheck_DocumentRequest	complianceCheckId
+PayerConfiguration_Audit		complianceDocumentRequestEmailRecipient
+*/
+select top 10 * from ComplianceReason order by id desc
+--
+select table_name, column_name from INFORMATION_SCHEMA.COLUMNS where COLUMN_NAME like '%ofac%'
+/*
+table_name								column_name
+OfacHit_PaymentOrder					OfacHitId
+PayerConfiguration						enableDashboardTwoFactorAuthentication
+PayerConfiguration						enableOfacBankScreening
+PayerConfiguration						enableOfacDuringPayeeRegistration
+PayerConfiguration						enableVendorPortalTwoFactorAuthentication
+PayerConfiguration						ShowOfacInfoInIframe
+Payee									ofacStatus
+Payee									ofacStatusReason
+OfacPOHit								OfacScreeningId
+OfacScreening							OfacVersion
+IDS_IdentityProviderConfiguration		ShouldUseTwoFactorAuthentication
+PayeeVersions							ofacStatus
+PayeeVersions							ofacStatusReason
+OfacHit									OfacEntryCurrentVersion
+OfacHit									OfacEntryId
+OfacHit									OfacEntryInvestigatedVersion
+OfacCountry								ofacEntryId
+PayerConfiguration_Audit				enableDashboardTwoFactorAuthentication
+PayerConfiguration_Audit				enableOfacBankScreening
+PayerConfiguration_Audit				enableOfacDuringPayeeRegistration
+PayerConfiguration_Audit				enableVendorPortalTwoFactorAuthentication
+PayerConfiguration_Audit				ShowOfacInfoInIframe
+HighRiskArea							createOfacCase
+IDS_IdentityProviderConfiguration_Audit	ShouldUseTwoFactorAuthentication
+*/
