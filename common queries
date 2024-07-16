@@ -47,3 +47,8 @@ join W8BEN w8 on tf.w8BENId = w8.id
 where pv.firstPayer =
 group by pv.payeeId,pv.idatpayer
 having count(distinct(w8.treatyCountry)) > 1
+----------------
+display all CF entities
+select * from payer where payername like '%%' 
+select * from CustomField where payerid =
+select * from CustomFieldMultipleValue where customFieldId =  order by code
